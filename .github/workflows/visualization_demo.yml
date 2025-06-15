@@ -1,0 +1,36 @@
+name: Visualization Demos
+
+on:
+  push:
+    paths:
+      - 'visualization_scripts/**'
+      - '.github/workflows/visualization_demo.yml'
+  workflow_dispatch:
+
+jobs:
+  run-demos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          pip install openmim
+          pip install torch==2.3.0+cpu torchvision==0.18.0+cpu -f https://download.pytorch.org/whl/cpu/torch_stable.html
+          mim install mmcv-full==1.7.2
+          pip install mmsegmentation==0.30.0 seaborn matplotlib
+      - name: Run visualization demos
+        run: |
+          cd visualization_scripts
+          PYTHONPATH=. python demo/demo_confusion_matrix.py
+          PYTHONPATH=. python demo/demo_analyze_logs.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: demo-images
+          path: |
+            visualization_scripts/confusion_matrix.png
+            visualization_scripts/demo_curve.png
+
